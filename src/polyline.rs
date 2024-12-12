@@ -424,14 +424,36 @@ impl PolyLine {
         self.shift_with_corrections(width)
     }
     pub fn must_shift_right(&self, width: Distance) -> PolyLine {
-        self.shift_right(width).unwrap()
+        match self.shift_right(width) {
+            Ok(polyline) => polyline,
+            Err(err) => {
+                eprintln!(
+                    "PolyLine::must_shift_right failed for width {}: {}. Returning an empty PolyLine.",
+                    width, err
+                );
+                PolyLine::empty() // Provide a fallback or empty PolyLine
+            }
+        }
     }
 
     pub fn shift_left(&self, width: Distance) -> Result<PolyLine> {
         self.shift_with_corrections(-width)
     }
     pub fn must_shift_left(&self, width: Distance) -> PolyLine {
-        self.shift_left(width).unwrap()
+        match self.shift_left(width) {
+            Ok(polyline) => polyline,
+            Err(err) => {
+                eprintln!(
+                    "PolyLine::must_shift_left failed for width {}: {}. Returning an empty PolyLine.",
+                    width, err
+                );
+                PolyLine::empty() // Provide a fallback or empty PolyLine
+            }
+        }
+    }
+    // Add an empty PolyLine function for fallback
+    pub fn empty() -> Self {
+        PolyLine::new(vec![]).expect("Failed to create an empty PolyLine")
     }
 
     /// Perpendicularly shifts the polyline to the right if positive or left if negative.
