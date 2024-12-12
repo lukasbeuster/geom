@@ -428,7 +428,7 @@ impl PolyLine {
         let deduped = self
         .remove_duplicate_adjacent_points()
         .expect("Failed to remove duplicate adjacent points");
-        
+
         // Now, perform the shift
         match self.shift_right(width) {
             Ok(polyline) => polyline,
@@ -481,7 +481,7 @@ impl PolyLine {
         let mut unique_points = Vec::new();
         for (i, pt) in self.pts.iter().enumerate() {
             // Push the first point or if the current point is not the same as the last one added
-            if i == 0 || *pt != unique_points.last().unwrap() {
+            if i == 0 || *pt != *unique_points.last().unwrap() {
                 unique_points.push(*pt);
             }
         }
