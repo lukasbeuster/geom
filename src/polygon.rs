@@ -3,7 +3,7 @@ use std::fmt;
 
 use anyhow::Result;
 use geo::{
-    Area, BooleanOps, Contains, ConvexHull, Intersects, MapCoordsInPlace, SimplifyVwPreserve,
+    Area, BooleanOps, Contains, ConvexHull, Intersects, MapCoordsInPlace, SimplifyVwPreserve,HasDimensions,
 };
 use serde::{Deserialize, Serialize};
 
