@@ -423,21 +423,15 @@ impl PolyLine {
     pub fn shift_right(&self, width: Distance) -> Result<PolyLine> {
         self.shift_with_corrections(width)
     }
-    pub fn must_shift_right(&self, width: Distance) -> PolyLine {
-        // First, remove duplicate adjacent points
-        let deduped = self
-        .remove_duplicate_adjacent_points()
-        .expect("Failed to remove duplicate adjacent points");
-
-        // Now, perform the shift
-        match self.shift_right(width) {
-            Ok(polyline) => polyline,
+    pub fn must_shift_left(&self, width: Distance) -> Option<PolyLine> {
+        match self.shift_left(width) {
+            Ok(polyline) => Some(polyline),
             Err(err) => {
                 eprintln!(
-                    "PolyLine::must_shift_right failed for width {}: {}. Returning a placeholder PolyLine.",
+                    "PolyLine::must_shift_left failed for width {}: {}. Skipping creation.",
                     width, err
                 );
-                PolyLine::placeholder() // Provide a placeholder PolyLine
+                None
             }
         }
     }
@@ -445,21 +439,16 @@ impl PolyLine {
     pub fn shift_left(&self, width: Distance) -> Result<PolyLine> {
         self.shift_with_corrections(-width)
     }
-    pub fn must_shift_left(&self, width: Distance) -> PolyLine {
-        // First, remove duplicate adjacent points
-        let deduped = self
-            .remove_duplicate_adjacent_points()
-            .expect("Failed to remove duplicate adjacent points");
-    
-        // Now, perform the shift
-        match deduped.shift_left(width) {
-            Ok(polyline) => polyline,
+
+    pub fn must_shift_right(&self, width: Distance) -> Option<PolyLine> {
+        match self.shift_right(width) {
+            Ok(polyline) => Some(polyline),
             Err(err) => {
                 eprintln!(
-                    "PolyLine::must_shift_left failed for width {}: {}. Returning a placeholder PolyLine.",
+                    "PolyLine::must_shift_right failed for width {}: {}. Skipping creation.",
                     width, err
                 );
-                PolyLine::placeholder() // Or handle as needed
+                None
             }
         }
     }
