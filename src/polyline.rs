@@ -523,9 +523,16 @@ impl PolyLine {
     /// `unchecked_new`
     pub fn make_polygons(&self, width: Distance) -> Polygon {
         let tessellation = self.thicken_tessellation(width);
-        let ring = Ring::deduping_new(tessellation.points.clone())
-            .expect("PolyLine::make_polygons() failed");
-        Polygon::pretessellated(vec![ring], tessellation)
+        match Ring::deduping_new(tessellation.points.clone()) {
+            Ok(ring) => Polygon::pretessellated(vec![ring], tessellation),
+            Err(err) => {
+                eprintln!(
+                    "PolyLine::make_polygons() failed for width {}: {}. Falling back to an empty polygon.",
+                    width, err
+                );
+                Polygon::new(vec![]) // Fallback to an empty polygon or handle as appropriate
+            }
+        }
     }
 
     /// This produces a `Polygon` with a possibly invalid `Ring`. It shouldn't crash. Use sparingly.
