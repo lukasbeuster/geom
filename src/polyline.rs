@@ -423,34 +423,28 @@ impl PolyLine {
     pub fn shift_right(&self, width: Distance) -> Result<PolyLine> {
         self.shift_with_corrections(width)
     }
-    pub fn must_shift_left(&self, width: Distance) -> Option<PolyLine> {
-        match self.shift_left(width) {
-            Ok(polyline) => Some(polyline),
-            Err(err) => {
-                eprintln!(
-                    "PolyLine::must_shift_left failed for width {}: {}. Skipping creation.",
-                    width, err
-                );
-                None
-            }
-        }
+    pub fn must_shift_left(&self, width: Distance) -> PolyLine {
+        self.shift_left(width).unwrap_or_else(|err| {
+            eprintln!(
+                "PolyLine::must_shift_left failed for width {}: {}. Returning a placeholder PolyLine.",
+                width, err
+            );
+            PolyLine::placeholder()
+        })
     }
 
     pub fn shift_left(&self, width: Distance) -> Result<PolyLine> {
         self.shift_with_corrections(-width)
     }
 
-    pub fn must_shift_right(&self, width: Distance) -> Option<PolyLine> {
-        match self.shift_right(width) {
-            Ok(polyline) => Some(polyline),
-            Err(err) => {
-                eprintln!(
-                    "PolyLine::must_shift_right failed for width {}: {}. Skipping creation.",
-                    width, err
-                );
-                None
-            }
-        }
+    pub fn must_shift_right(&self, width: Distance) -> PolyLine {
+        self.shift_right(width).unwrap_or_else(|err| {
+            eprintln!(
+                "PolyLine::must_shift_right failed for width {}: {}. Returning a placeholder PolyLine.",
+                width, err
+            );
+            PolyLine::placeholder()
+        })
     }
 
     // Add an empty PolyLine function for fallback
@@ -460,9 +454,12 @@ impl PolyLine {
     }
 
     pub fn placeholder() -> Self {
-        // Create a placeholder with two identical points to meet the "at least two points" requirement
-        PolyLine::new(vec![Pt2D::new(0.0, 0.0), Pt2D::new(0.0, 0.0)])
-            .expect("Failed to create a placeholder PolyLine")
+        // Define a minimal PolyLine with two distinct points to avoid duplication issues
+        PolyLine::new(vec![
+            Pt2D::new(0.0, 0.0),
+            Pt2D::new(1.0, 0.0),
+        ])
+        .expect("Failed to create a valid placeholder PolyLine")
     }
 
     /// Removes duplicate adjacent points from the PolyLine
