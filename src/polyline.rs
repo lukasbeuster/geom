@@ -428,10 +428,10 @@ impl PolyLine {
             Ok(polyline) => polyline,
             Err(err) => {
                 eprintln!(
-                    "PolyLine::must_shift_right failed for width {}: {}. Returning an empty PolyLine.",
+                    "PolyLine::must_shift_right failed for width {}: {}. Returning a placeholder PolyLine.",
                     width, err
                 );
-                PolyLine::empty() // Provide a fallback or empty PolyLine
+                PolyLine::placeholder() // Provide a placeholder PolyLine
             }
         }
     }
@@ -444,16 +444,24 @@ impl PolyLine {
             Ok(polyline) => polyline,
             Err(err) => {
                 eprintln!(
-                    "PolyLine::must_shift_left failed for width {}: {}. Returning an empty PolyLine.",
+                    "PolyLine::must_shift_left failed for width {}: {}. Returning a placeholder PolyLine.",
                     width, err
                 );
-                PolyLine::empty() // Provide a fallback or empty PolyLine
+                PolyLine::placeholder() // Provide a placeholder PolyLine
             }
         }
     }
+    
     // Add an empty PolyLine function for fallback
-    pub fn empty() -> Self {
-        PolyLine::new(vec![]).expect("Failed to create an empty PolyLine")
+    pub fn empty() -> Option<Self> {
+        // Return `None` to indicate an invalid or empty PolyLine
+        None
+    }
+
+    pub fn placeholder() -> Self {
+        // Create a placeholder with two identical points to meet the "at least two points" requirement
+        PolyLine::new(vec![Pt2D::new(0.0, 0.0), Pt2D::new(0.0, 0.0)])
+            .expect("Failed to create a placeholder PolyLine")
     }
 
     /// Perpendicularly shifts the polyline to the right if positive or left if negative.
