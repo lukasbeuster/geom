@@ -413,6 +413,17 @@ impl Polygon {
     /// Optionally map the world-space points back to GPS.
     pub fn to_geojson(&self, gps: Option<&GPSBounds>) -> geojson::Geometry {
         let mut geom: geo::Geometry = self.to_geo().into();
+
+        // Check if the geometry is valid (e.g., no points or invalid structure)
+        if geom.is_empty() || geom.dimensions().is_empty() {
+            eprintln!("Skipping invalid or empty geometry.");
+            return geojson::Geometry {
+                bbox: None,
+                value: geojson::Value::GeometryCollection(vec![]), // Return an empty collection
+                foreign_members: None,
+            };
+        }
+
         if let Some(ref gps_bounds) = gps {
             geom.map_coords_in_place(|c| {
                 let gps = Pt2D::new(c.x, c.y).to_gps(gps_bounds);
