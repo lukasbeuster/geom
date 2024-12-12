@@ -415,7 +415,7 @@ impl Polygon {
         let mut geom: geo::Geometry = self.to_geo().into();
 
         // Check if the geometry is valid (e.g., no points or invalid structure)
-        if geom.is_empty() || geom.dimensions().is_empty() {
+        if geom.is_empty() || matches!(geom.dimensions(), geo::Dimensions::Empty) {
             eprintln!("Skipping invalid or empty geometry.");
             return geojson::Geometry {
                 bbox: None,
