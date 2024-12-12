@@ -424,6 +424,12 @@ impl PolyLine {
         self.shift_with_corrections(width)
     }
     pub fn must_shift_right(&self, width: Distance) -> PolyLine {
+        // First, remove duplicate adjacent points
+        let deduped = self
+        .remove_duplicate_adjacent_points()
+        .expect("Failed to remove duplicate adjacent points");
+        
+        // Now, perform the shift
         match self.shift_right(width) {
             Ok(polyline) => polyline,
             Err(err) => {
@@ -440,18 +446,24 @@ impl PolyLine {
         self.shift_with_corrections(-width)
     }
     pub fn must_shift_left(&self, width: Distance) -> PolyLine {
-        match self.shift_left(width) {
+        // First, remove duplicate adjacent points
+        let deduped = self
+            .remove_duplicate_adjacent_points()
+            .expect("Failed to remove duplicate adjacent points");
+    
+        // Now, perform the shift
+        match deduped.shift_left(width) {
             Ok(polyline) => polyline,
             Err(err) => {
                 eprintln!(
                     "PolyLine::must_shift_left failed for width {}: {}. Returning a placeholder PolyLine.",
                     width, err
                 );
-                PolyLine::placeholder() // Provide a placeholder PolyLine
+                PolyLine::placeholder() // Or handle as needed
             }
         }
     }
-    
+
     // Add an empty PolyLine function for fallback
     pub fn empty() -> Option<Self> {
         // Return `None` to indicate an invalid or empty PolyLine
@@ -462,6 +474,27 @@ impl PolyLine {
         // Create a placeholder with two identical points to meet the "at least two points" requirement
         PolyLine::new(vec![Pt2D::new(0.0, 0.0), Pt2D::new(0.0, 0.0)])
             .expect("Failed to create a placeholder PolyLine")
+    }
+
+    /// Removes duplicate adjacent points from the PolyLine
+    pub fn remove_duplicate_adjacent_points(&self) -> Result<PolyLine> {
+        let mut unique_points = Vec::new();
+        for (i, pt) in self.pts.iter().enumerate() {
+            // Push the first point or if the current point is not the same as the last one added
+            if i == 0 || *pt != unique_points.last().unwrap() {
+                unique_points.push(*pt);
+            }
+        }
+
+        // Ensure at least two points remain after deduplication
+        if unique_points.len() < 2 {
+            Err(anyhow::anyhow!(
+                "Need at least two unique points for a PolyLine, but only {} found after deduplication",
+                unique_points.len()
+            ))
+        } else {
+            Ok(PolyLine::new(unique_points)?)
+        }
     }
 
     /// Perpendicularly shifts the polyline to the right if positive or left if negative.
