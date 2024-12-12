@@ -461,6 +461,9 @@ impl PolyLine {
         ])
         .expect("Failed to create a valid placeholder PolyLine")
     }
+    pub fn is_placeholder(&self) -> bool {
+        self.pts.is_empty() // or any condition that determines placeholder status
+    }
 
     /// Removes duplicate adjacent points from the PolyLine
     pub fn remove_duplicate_adjacent_points(&self) -> Result<PolyLine> {
