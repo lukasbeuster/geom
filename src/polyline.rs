@@ -523,6 +523,14 @@ impl PolyLine {
     /// `unchecked_new`
     pub fn make_polygons(&self, width: Distance) -> Polygon {
         let tessellation = self.thicken_tessellation(width);
+        if tessellation.points.is_empty() {
+            eprintln!(
+                "PolyLine::make_polygons() failed for width {}: Tessellation is empty. Skipping polygon creation.",
+                width
+            );
+            return Polygon::pretessellated(vec![], Tessellation::new(vec![], vec![]));
+        }
+    
         match Ring::deduping_new(tessellation.points.clone()) {
             Ok(ring) => Polygon::pretessellated(vec![ring], tessellation),
             Err(err) => {
