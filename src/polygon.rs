@@ -3,9 +3,8 @@ use std::fmt;
 
 use anyhow::Result;
 use geo::{
-    Area, BooleanOps, Contains, ConvexHull, Intersects, MapCoordsInPlace, SimplifyVwPreserve,HasDimensions,
+    Area, BooleanOps, Contains, ConvexHull, Intersects, MapCoordsInPlace, SimplifyVwPreserve,
 };
-use geo::algorithm::dimensions::Dimensions;
 use serde::{Deserialize, Serialize};
 
 use crate::{
@@ -413,37 +412,18 @@ impl Polygon {
 
     /// Optionally map the world-space points back to GPS.
     pub fn to_geojson(&self, gps: Option<&GPSBounds>) -> geojson::Geometry {
-        if let Some(polygon) = self.make_polygons(0.0) {
-            let mut geom: geo::Geometry = polygon.to_geo().into();
-    
-            if geom.is_empty() {
-                eprintln!("Skipping empty geometry in to_geojson.");
-                return geojson::Geometry {
-                    bbox: None,
-                    value: geojson::Value::GeometryCollection(vec![]),
-                    foreign_members: None,
-                };
-            }
-    
-            if let Some(ref gps_bounds) = gps {
-                geom.map_coords_in_place(|c| {
-                    let gps = Pt2D::new(c.x, c.y).to_gps(gps_bounds);
-                    (gps.x(), gps.y()).into()
-                });
-            }
-    
-            geojson::Geometry {
-                bbox: None,
-                value: geojson::Value::from(&geom),
-                foreign_members: None,
-            }
-        } else {
-            eprintln!("Skipping invalid polygon in to_geojson.");
-            geojson::Geometry {
-                bbox: None,
-                value: geojson::Value::GeometryCollection(vec![]), // Empty collection
-                foreign_members: None,
-            }
+        let mut geom: geo::Geometry = self.to_geo().into();
+        if let Some(ref gps_bounds) = gps {
+            geom.map_coords_in_place(|c| {
+                let gps = Pt2D::new(c.x, c.y).to_gps(gps_bounds);
+                (gps.x(), gps.y()).into()
+            });
+        }
+
+        geojson::Geometry {
+            bbox: None,
+            value: geojson::Value::from(&geom),
+            foreign_members: None,
         }
     }
 
