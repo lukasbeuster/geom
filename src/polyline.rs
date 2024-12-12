@@ -521,24 +521,25 @@ impl PolyLine {
 
     /// This produces a `Polygon` with a valid `Ring`. It may crash if this polyline was made with
     /// `unchecked_new`
-    pub fn make_polygons(&self, width: Distance) -> Polygon {
+    pub fn make_polygons(&self, width: Distance) -> Option<Polygon> {
         let tessellation = self.thicken_tessellation(width);
+    
         if tessellation.points.is_empty() {
             eprintln!(
-                "PolyLine::make_polygons() failed for width {}: Tessellation is empty. Skipping polygon creation.",
+                "PolyLine::make_polygons() failed for width {}: Tessellation is empty. Returning None.",
                 width
             );
-            return Polygon::pretessellated(vec![], Tessellation::new(vec![], vec![]));
+            return None;
         }
     
         match Ring::deduping_new(tessellation.points.clone()) {
-            Ok(ring) => Polygon::pretessellated(vec![ring], tessellation),
+            Ok(ring) => Some(Polygon::pretessellated(vec![ring], tessellation)),
             Err(err) => {
                 eprintln!(
-                    "PolyLine::make_polygons() failed for width {}: {}. Falling back to an empty polygon.",
+                    "PolyLine::make_polygons() failed for width {}: {}. Returning None.",
                     width, err
                 );
-                Polygon::pretessellated(vec![], Tessellation::new(vec![], vec![]))
+                None
             }
         }
     }

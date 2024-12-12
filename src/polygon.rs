@@ -413,29 +413,37 @@ impl Polygon {
 
     /// Optionally map the world-space points back to GPS.
     pub fn to_geojson(&self, gps: Option<&GPSBounds>) -> geojson::Geometry {
-        let mut geom: geo::Geometry = self.to_geo().into();
-
-    // Check for invalid or empty geometries
-    if geom.is_empty() || matches!(geom.dimensions(), geo::dimensions::Dimensions::Empty) {
-        eprintln!("Skipping invalid or empty geometry in to_geojson.");
-        return geojson::Geometry {
-            bbox: None,
-            value: geojson::Value::GeometryCollection(vec![]), // Return an empty geometry collection
-            foreign_members: None,
-        };
-    }
-
-        if let Some(ref gps_bounds) = gps {
-            geom.map_coords_in_place(|c| {
-                let gps = Pt2D::new(c.x, c.y).to_gps(gps_bounds);
-                (gps.x(), gps.y()).into()
-            });
-        }
-
-        geojson::Geometry {
-            bbox: None,
-            value: geojson::Value::from(&geom),
-            foreign_members: None,
+        if let Some(polygon) = self.make_polygons(0.0) {
+            let mut geom: geo::Geometry = polygon.to_geo().into();
+    
+            if geom.is_empty() {
+                eprintln!("Skipping empty geometry in to_geojson.");
+                return geojson::Geometry {
+                    bbox: None,
+                    value: geojson::Value::GeometryCollection(vec![]),
+                    foreign_members: None,
+                };
+            }
+    
+            if let Some(ref gps_bounds) = gps {
+                geom.map_coords_in_place(|c| {
+                    let gps = Pt2D::new(c.x, c.y).to_gps(gps_bounds);
+                    (gps.x(), gps.y()).into()
+                });
+            }
+    
+            geojson::Geometry {
+                bbox: None,
+                value: geojson::Value::from(&geom),
+                foreign_members: None,
+            }
+        } else {
+            eprintln!("Skipping invalid polygon in to_geojson.");
+            geojson::Geometry {
+                bbox: None,
+                value: geojson::Value::GeometryCollection(vec![]), // Empty collection
+                foreign_members: None,
+            }
         }
     }
 
