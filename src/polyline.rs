@@ -536,10 +536,11 @@ impl PolyLine {
             Ok(ring) => Some(Polygon::pretessellated(vec![ring], tessellation)),
             Err(err) => {
                 eprintln!(
-                    "PolyLine::make_polygons() failed for width {}: {}. Returning None.",
+                    "PolyLine::make_polygons() failed for width {}: {}. Falling back to unsafe_make_polygons.",
                     width, err
                 );
-                None
+                // Fallback to `unsafe_make_polygons` to avoid crashing
+                Some(self.unsafe_make_polygons(width))
             }
         }
     }
