@@ -530,7 +530,7 @@ impl PolyLine {
                     "PolyLine::make_polygons() failed for width {}: {}. Falling back to an empty polygon.",
                     width, err
                 );
-                Polygon::new(vec![]) // Fallback to an empty polygon or handle as appropriate
+                Polygon::pretessellated(vec![], Tessellation::new(vec![], vec![]))
             }
         }
     }
