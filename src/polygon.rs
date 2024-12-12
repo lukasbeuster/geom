@@ -5,6 +5,7 @@ use anyhow::Result;
 use geo::{
     Area, BooleanOps, Contains, ConvexHull, Intersects, MapCoordsInPlace, SimplifyVwPreserve,HasDimensions,
 };
+use geo::algorithm::dimensions::Dimensions;
 use serde::{Deserialize, Serialize};
 
 use crate::{
@@ -415,7 +416,7 @@ impl Polygon {
         let mut geom: geo::Geometry = self.to_geo().into();
 
         // Check if the geometry is valid (e.g., no points or invalid structure)
-        if geom.is_empty() || matches!(geom.dimensions(), geo::Dimensions::Empty) {
+        if geom.is_empty() || matches!(geom.dimensions(), Dimensions::Empty) {
             eprintln!("Skipping invalid or empty geometry.");
             return geojson::Geometry {
                 bbox: None,
