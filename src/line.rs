@@ -21,8 +21,15 @@ impl Line {
 
     /// Equivalent to `Line::new(pt1, pt2).unwrap()`. Use this to effectively document an assertion
     /// at the call-site.
-    pub fn must_new(pt1: Pt2D, pt2: Pt2D) -> Line {
-        Line::new(pt1, pt2).unwrap()
+    /// Updated to handle errors
+    pub fn must_new(pt1: Pt2D, pt2: Pt2D) -> Option<Line> {
+        match Line::new(pt1, pt2) {
+            Ok(line) => Some(line),
+            Err(_) => {
+                println!("Skipping invalid line segment from {:?} to {:?}", pt1, pt2);
+                None
+            }
+        }
     }
 
     /// Returns an infinite line passing through this line's two points.
